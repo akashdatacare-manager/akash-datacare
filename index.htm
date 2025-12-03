@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Akash DataCare - Data Management AI</title>
+
+<!-- Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Font Awesome -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+<style>
+body {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: #fff;
+    font-family: "Poppins", sans-serif;
+    height: 100vh;
+}
+.assistant-box {
+    max-width: 500px;
+    margin: 60px auto;
+    padding: 30px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.05);
+    box-shadow: 0 0 25px rgba(0,0,0,0.5);
+    backdrop-filter: blur(10px);
+}
+.mic-btn {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: #4caf50;
+    border: none;
+    box-shadow: 0 0 18px rgba(76, 175, 80, 0.6);
+    transition: 0.3s;
+}
+.mic-btn:hover { background: #45a049; }
+.wave {
+    width: 12px;
+    height: 40px;
+    background: #00eaff;
+    margin: 0 4px;
+    border-radius: 6px;
+    animation: wave 1s infinite ease-in-out;
+}
+@keyframes wave { 0%{height:10px;}50%{height:40px;}100%{height:10px;} }
+#output {
+    min-height: 120px;
+    background: rgba(0,0,0,0.4);
+    padding: 15px;
+    border-radius: 10px;
+    overflow-y: auto;
+}
+</style>
+</head>
+<body>
+
+<div class="assistant-box text-center">
+    <h2 class="fw-bold mb-3">🛡️ Akash DataCare</h2>
+    <p class="mb-4 text-light">Data management me help ke liye mic dabao ya boliye.</p>
+
+    <div class="d-flex justify-content-center mb-4">
+        <div class="wave"></div>
+        <div class="wave" style="animation-delay:0.1s"></div>
+        <div class="wave" style="animation-delay:0.2s"></div>
+        <div class="wave" style="animation-delay:0.3s"></div>
+        <div class="wave" style="animation-delay:0.4s"></div>
+    </div>
+
+    <button class="mic-btn mb-4" id="micBtn">
+        <i class="fa-solid fa-microphone fa-2x text-white"></i>
+    </button>
+
+    <div id="output" class="text-start"><strong>Assistant:</strong> Loading…</div>
+</div>
+
+<script>
+// ---------------- Option 1 JSON Prompt as inline JS variable ----------------
+const dataCarePrompt = {
+  role: "system",
+  content: "You are Akash DataCare, a real-time Voice + Text AI Assistant focused on data management. Speak friendly Hinglish, give short, clear, and accurate responses. Expertise in Google Sheets formulas, Excel, data cleaning, validation, dashboards, ETL logic. Don't guess, don't be robotic, always try to help efficiently."
+};
+// ---------------------------------------------------------------------------
+
+// Output box reference
+const outputBox = document.getElementById("output");
+
+// Speech Recognition setup
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const recognition = new SpeechRecognition();
+recognition.lang = "hi-IN";
+
+// Auto welcome voice
+window.onload = () => {
+    let welcomeText = "Namaste! Main Akash DataCare hoon, aapka data management assistant. Bataiye, kaise help kar sakta hoon?";
+    speak(welcomeText);
+    outputBox.innerHTML = "<strong>Assistant:</strong> " + welcomeText;
+};
+
+// Mic button click
+document.getElementById("micBtn").addEventListener("click", () => {
+    recognition.start();
+    outputBox.innerHTML = "<strong>Listening...</strong>";
+});
+
+// Voice recognition result
+recognition.onresult = async (event) => {
+    let userText = event.results[0][0].transcript;
+    outputBox.innerHTML = "<strong>You:</strong> " + userText + "<br><br><strong>Assistant:</strong> Soch raha hoon...";
+
+    let reply = await getAIResponse(userText);
+
+    outputBox.innerHTML = "<strong>You:</strong> " + userText + "<br><br><strong>Assistant:</strong> " + reply;
+
+    speak(reply);
+};
+
+// Speak function
+function speak(text){
+    let speech = new SpeechSynthesisUtterance(text);
+    speech.lang = "hi-IN";
+    speech.rate = 1;
+    speech.pitch = 1;
+    window.speechSynthesis.speak(speech);
+}
+
+async function getAIResponse(userText){
+    let response = await fetch("YOUR_AI_API_ENDPOINT", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer YOUR_API_KEY"
+        },
+        body: JSON.stringify({
+            prompt: [
+                dataCarePrompt,
+                {role: "user", content: userText}
+            ]
+        })
+    });
+    let data = await response.json();
+    return data.reply;
+}
+
+
+</script>
+
+</body>
+</html>
